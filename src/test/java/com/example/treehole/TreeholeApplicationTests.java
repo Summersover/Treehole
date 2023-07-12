@@ -28,8 +28,8 @@ class TreeholeApplicationTests implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
-    //测试容器是否存在
     @Test
+    //测试容器是否存在
     public void testApplicationContext() {
         System.out.println(applicationContext);
         //可以通过类或者Repository名来获取

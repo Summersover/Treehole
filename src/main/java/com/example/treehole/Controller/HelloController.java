@@ -109,7 +109,7 @@ public class HelloController {
     @GetMapping("/employee")
     @ResponseBody
     public List<Map<String, Object>> getEmployee() {
-        List<Map<String,Object>> list=new ArrayList<>();
+        List<Map<String, Object>> list = new ArrayList<>();
 
         Map<String, Object> map = new HashMap<>();
         map.put("name", "声声乌龙");

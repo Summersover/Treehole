@@ -62,9 +62,10 @@ public class HelloController {
     // RequestMapping在指定路径外，还可以指定唯一的访问方法，这一句等同于GetMapping
     @GetMapping("/students")
     @ResponseBody
-    public String getStudents( // 传参可以用RequestParam注解的不同字段进行限制
-                               @RequestParam(name = "current", required = false, defaultValue = "1") int current,
-                               @RequestParam(name = "limit", required = false, defaultValue = "10") int limit) {
+    // 传参可以用RequestParam注解的不同字段进行限制
+    public String getStudents(
+            @RequestParam(name = "current", required = false, defaultValue = "1") int current,
+            @RequestParam(name = "limit", required = false, defaultValue = "10") int limit) {
         System.out.println(current);
         System.out.println(limit);
         return "Some Students";

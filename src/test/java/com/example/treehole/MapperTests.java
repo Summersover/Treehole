@@ -17,7 +17,7 @@ import java.util.List;
 @SpringBootTest
 //指定运行环境配置类为正式环境
 @ContextConfiguration(classes = TreeholeApplication.class)
-public class MapperTest {
+public class MapperTests {
 
     @Autowired
     private UserMapper userMapper;

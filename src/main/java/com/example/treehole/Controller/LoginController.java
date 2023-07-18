@@ -3,6 +3,9 @@ package com.example.treehole.Controller;
 import com.example.treehole.Entity.User;
 import com.example.treehole.Service.UserService;
 import com.example.treehole.Util.TreeholeConstant;
+import com.google.code.kaptcha.Producer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,13 +13,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 @Controller
 public class LoginController implements TreeholeConstant {
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private Producer kaptchaProducer;
 
     @GetMapping("/register")
     public String getRegsiterPage() {
@@ -24,7 +37,7 @@ public class LoginController implements TreeholeConstant {
     }
 
     @GetMapping("/login")
-    public String getLoginPage(){
+    public String getLoginPage() {
         return "/site/login";
     }
 
@@ -51,13 +64,29 @@ public class LoginController implements TreeholeConstant {
         if (result == ACTIVATION_SUCCESS) {
             model.addAttribute("msg", "账号激活成功");
             model.addAttribute("target", "/login");
-        } else if (result==ACTIVATION_REPEAT) {
+        } else if (result == ACTIVATION_REPEAT) {
             model.addAttribute("msg", "该账号已激活");
             model.addAttribute("target", "/index");
-        }else {
+        } else {
             model.addAttribute("msg", "激活码错误");
             model.addAttribute("target", "/index");
         }
         return "/site/operate-result";
+    }
+
+    @GetMapping("/kaptcha")
+    public void getKaptcha(HttpServletResponse response, HttpSession session) {
+        // 生成验证码
+        String text = kaptchaProducer.createText();
+        BufferedImage image = kaptchaProducer.createImage(text);
+
+        // 图片传输
+        response.setContentType("image/png");
+        try {
+            OutputStream os = response.getOutputStream();
+            ImageIO.write(image, "png", os);
+        } catch (IOException e) {
+            logger.error("响应验证码失败" + e.getMessage());
+        }
     }
 }

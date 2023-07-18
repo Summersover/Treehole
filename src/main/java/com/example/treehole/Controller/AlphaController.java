@@ -15,7 +15,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/alpha")
-public class HelloController {
+public class AlphaController {
     @Autowired
     private AlphaService alphaService;
 

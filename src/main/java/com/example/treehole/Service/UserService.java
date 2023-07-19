@@ -105,6 +105,7 @@ public class UserService implements TreeholeConstant {
         if (user.getStatus() == 1) {
             return ACTIVATION_REPEAT;
         } else if (user.getActivationCode().equals(activationCode)) {
+            userMapper.updateStatus(userId, 1);
             return ACTIVATION_SUCCESS;
         } else {
             return ACTIVATION_FAILURE;

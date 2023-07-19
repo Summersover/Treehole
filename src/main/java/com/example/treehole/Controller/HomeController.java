@@ -2,6 +2,7 @@ package com.example.treehole.Controller;
 
 import com.example.treehole.Entity.DiscussPost;
 import com.example.treehole.Entity.Page;
+import com.example.treehole.Entity.User;
 import com.example.treehole.Service.DiscussPostService;
 import com.example.treehole.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ public class HomeController {
             for (DiscussPost post : list) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("post", post);
-                map.put("user", userService.findUserById(post.getUserId()));
+                User user = userService.findUserById(post.getUserId());
+                map.put("user", user);
                 discussPosts.add(map);
             }
         }

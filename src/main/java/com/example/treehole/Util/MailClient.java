@@ -22,9 +22,9 @@ public class MailClient {
     private String from;
 
     public void sendMail(String to, String subject, String content) {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
         try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
             helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject(subject);

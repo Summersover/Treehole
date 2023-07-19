@@ -33,7 +33,7 @@ public class LoginController implements TreeholeConstant {
     private Producer kaptchaProducer;
 
     @GetMapping("/register")
-    public String getRegsiterPage() {
+    public String getRegisterPage() {
         return "/site/register";
     }
 

@@ -1,5 +1,6 @@
 package com.example.treehole.Controller;
 
+import com.example.treehole.Annotation.LoginRequired;
 import com.example.treehole.Entity.User;
 import com.example.treehole.Service.UserService;
 import com.example.treehole.Util.HostHolder;
@@ -44,11 +45,13 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @LoginRequired
     @GetMapping("/setting")
     public String getSettingPage() {
         return "/site/setting";
     }
 
+    @LoginRequired
     @PostMapping("/upload")
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {

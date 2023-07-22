@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -55,7 +56,7 @@ public class UserController {
     @PostMapping("/upload")
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
-            model.addAttribute("erroe", "您还没有选择图片");
+            model.addAttribute("error", "您还没有选择图片");
             return "/site/setting";
         }
         String filename = headerImage.getOriginalFilename();
@@ -98,6 +99,22 @@ public class UserController {
             }
         } catch (IOException e) {
             logger.error("读取头像失败：" + e.getMessage());
+        }
+    }
+
+    @LoginRequired
+    @PostMapping("/updatePassword")
+    public String updatePassword(String oldPassword, String newPassword,Model model){
+        User user=hostHolder.getUser();
+        int userId=user.getId();
+        Map<String,Object> map=userService.updatePassword(userId,oldPassword,newPassword);
+        // 如果map里没有消息则没有报错，重定向到退出界面
+        if(map==null||map.isEmpty()){
+            return "redirect:/logout";
+        }else {
+            model.addAttribute("oldPasswordMsg",map.get("oldPasswordMsg"));
+            model.addAttribute("newPasswordMsg",map.get("newPasswordMsg"));
+            return "/site/setting"; // 报错则返回原设置界面
         }
     }
 }

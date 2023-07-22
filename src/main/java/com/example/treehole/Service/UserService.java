@@ -164,4 +164,31 @@ public class UserService implements TreeholeConstant {
     public int updateHeader(int userId, String headerUrl) {
         return userMapper.updateHeader(userId, headerUrl);
     }
+
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
+        Map<String, Object> map = new HashMap<>();
+
+        if (StringUtils.isBlank(oldPassword)) {
+            map.put("oldPasswordMsg", "原密码不能为空");
+            return map;
+        }
+        if (StringUtils.isBlank(newPassword)) {
+            map.put("newPasswordMsg", "新密码不能为空");
+            return map;
+        }
+
+        User user = userMapper.selectById(userId);
+        oldPassword = TreeholeUtil.md5(oldPassword + user.getSalt());
+        if (!oldPassword.equals(user.getPassword())) {
+            map.put("oldPasswordMsg", "原密码输入错误");
+            return map;
+        } else {
+            newPassword = TreeholeUtil.md5(newPassword + user.getSalt());
+            userMapper.updatePassword(userId, newPassword);
+        }
+
+        return map;
+
+
+    }
 }

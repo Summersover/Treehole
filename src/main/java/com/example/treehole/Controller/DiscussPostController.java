@@ -31,7 +31,7 @@ public class DiscussPostController {
             return TreeholeUtil.getJsonString(403, "请先登录");
         }
         DiscussPost discussPost = new DiscussPost();
-        discussPost.setId(user.getId());
+        discussPost.setUserId(user.getId());
         discussPost.setTitle(title);
         discussPost.setContent(content);
         discussPost.setCreateTime(new Date());

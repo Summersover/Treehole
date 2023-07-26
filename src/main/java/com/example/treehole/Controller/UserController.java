@@ -104,16 +104,16 @@ public class UserController {
 
     @LoginRequired
     @PostMapping("/updatePassword")
-    public String updatePassword(String oldPassword, String newPassword,Model model){
-        User user=hostHolder.getUser();
-        int userId=user.getId();
-        Map<String,Object> map=userService.updatePassword(userId,oldPassword,newPassword);
+    public String updatePassword(String oldPassword, String newPassword, Model model) {
+        User user = hostHolder.getUser();
+        int userId = user.getId();
+        Map<String, Object> map = userService.updatePassword(userId, oldPassword, newPassword);
         // 如果map里没有消息则没有报错，重定向到退出界面
-        if(map==null||map.isEmpty()){
+        if (map == null || map.isEmpty()) {
             return "redirect:/logout";
-        }else {
-            model.addAttribute("oldPasswordMsg",map.get("oldPasswordMsg"));
-            model.addAttribute("newPasswordMsg",map.get("newPasswordMsg"));
+        } else {
+            model.addAttribute("oldPasswordMsg", map.get("oldPasswordMsg"));
+            model.addAttribute("newPasswordMsg", map.get("newPasswordMsg"));
             return "/site/setting"; // 报错则返回原设置界面
         }
     }

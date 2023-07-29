@@ -78,7 +78,7 @@ public class SensitiveFilter {
         TrieNode tempNode = rootNode;
         int begin = 0;
         int position = 0;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         while (position < text.length()) {
             char c = text.charAt(position);
@@ -92,6 +92,7 @@ public class SensitiveFilter {
                 }
                 // 指针3一定后移
                 position++;
+                continue;
             }
             // 检查下级节点
             tempNode = tempNode.getSubNode(c);
@@ -133,6 +134,14 @@ public class SensitiveFilter {
 
         // 子结点（key是下级字符，value是下级节点）
         private Map<Character, TrieNode> subNodes = new HashMap<>();
+
+        public boolean isKeywordEnd() {
+            return isKeywordEnd;
+        }
+
+        public void setKeywordEnd(boolean keywordEnd) {
+            isKeywordEnd = keywordEnd;
+        }
 
         // 添加子节点
         public void addSubNode(Character c, TrieNode node) {

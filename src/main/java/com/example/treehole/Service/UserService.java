@@ -188,7 +188,9 @@ public class UserService implements TreeholeConstant {
         }
 
         return map;
+    }
 
-
+    public User findUserByName(String username) {
+        return userMapper.selectByUsername(username);
     }
 }

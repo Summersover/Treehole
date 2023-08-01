@@ -2,9 +2,11 @@ package com.example.treehole.Controller;
 
 import com.example.treehole.Annotation.LoginRequired;
 import com.example.treehole.Entity.User;
+import com.example.treehole.Service.FollowService;
 import com.example.treehole.Service.LikeService;
 import com.example.treehole.Service.UserService;
 import com.example.treehole.Util.HostHolder;
+import com.example.treehole.Util.TreeholeConstant;
 import com.example.treehole.Util.TreeholeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,7 +30,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements TreeholeConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -49,6 +51,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @LoginRequired
     @GetMapping("/setting")
@@ -129,10 +134,23 @@ public class UserController {
         if (user == null) {
             throw new RuntimeException("该用户不存在!");
         }
-
+        // 该用户的赞数
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("user", user);
         model.addAttribute("likeCount", likeCount);
+
+        // 关注数
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        // 粉丝数
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        // 是否关注
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), userId, ENTITY_TYPE_USER);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }

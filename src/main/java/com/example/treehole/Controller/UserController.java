@@ -148,7 +148,7 @@ public class UserController implements TreeholeConstant {
         // 是否关注
         boolean hasFollowed = false;
         if (hostHolder.getUser() != null) {
-            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), userId, ENTITY_TYPE_USER);
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
         }
         model.addAttribute("hasFollowed", hasFollowed);
 

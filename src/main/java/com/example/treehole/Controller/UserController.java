@@ -2,6 +2,7 @@ package com.example.treehole.Controller;
 
 import com.example.treehole.Annotation.LoginRequired;
 import com.example.treehole.Entity.User;
+import com.example.treehole.Service.LikeService;
 import com.example.treehole.Service.UserService;
 import com.example.treehole.Util.HostHolder;
 import com.example.treehole.Util.TreeholeUtil;
@@ -45,6 +46,9 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
 
     @LoginRequired
     @GetMapping("/setting")
@@ -117,4 +121,20 @@ public class UserController {
             return "/site/setting"; // 报错则返回原设置界面
         }
     }
+
+    @GetMapping("profile/{userId}")
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        // 可以访问任意用户的首页
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在!");
+        }
+
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("user", user);
+        model.addAttribute("likeCount", likeCount);
+
+        return "/site/profile";
+    }
+
 }

@@ -5,13 +5,14 @@ import com.example.treehole.DAO.UserMapper;
 import com.example.treehole.Entity.LoginTicket;
 import com.example.treehole.Entity.User;
 import com.example.treehole.Util.MailClient;
+import com.example.treehole.Util.RedisKeyUtil;
 import com.example.treehole.Util.TreeholeConstant;
 import com.example.treehole.Util.TreeholeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService implements TreeholeConstant {
@@ -33,7 +35,10 @@ public class UserService implements TreeholeConstant {
     private TemplateEngine templateEngine;
 
     @Autowired
-    private LoginTicketMapper loginTicketMapper;
+    private RedisTemplate redisTemplate;
+
+//    @Autowired
+//    private LoginTicketMapper loginTicketMapper;
 
     @Value("${treehole.path.domain}")
     private String domain;
@@ -42,7 +47,12 @@ public class UserService implements TreeholeConstant {
     private String contextPath;
 
     public User findUserById(int id) {
-        return userMapper.selectById(id);
+//        return userMapper.selectById(id);
+        User user = getCache(id);
+        if (user == null) {
+            user = initCache(id);
+        }
+        return user;
     }
 
     public Map<String, Object> register(User user) {
@@ -106,6 +116,7 @@ public class UserService implements TreeholeConstant {
             return ACTIVATION_REPEAT;
         } else if (user.getActivationCode().equals(activationCode)) {
             userMapper.updateStatus(userId, 1);
+            clearCache(userId);
             return ACTIVATION_SUCCESS;
         } else {
             return ACTIVATION_FAILURE;
@@ -147,22 +158,33 @@ public class UserService implements TreeholeConstant {
         loginTicket.setTicket(TreeholeUtil.generateUUID());
         loginTicket.setStatus(0);
         loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSec * 1000));
-        loginTicketMapper.insertLoginTicket(loginTicket);
+//        loginTicketMapper.insertLoginTicket(loginTicket);
+        String key = RedisKeyUtil.getTicketKey(loginTicket.getTicket());
+        redisTemplate.opsForValue().set(key, loginTicket);
 
         map.put("ticket", loginTicket.getTicket());
         return map;
     }
 
     public void logout(String ticket) {
-        loginTicketMapper.updateStatus(ticket, 1);
+//        loginTicketMapper.updateStatus(ticket, 1);
+        String key = RedisKeyUtil.getTicketKey(ticket);
+        LoginTicket loginTicket = (LoginTicket) redisTemplate.opsForValue().get(key);
+        loginTicket.setStatus(1);
+        redisTemplate.opsForValue().set(key, loginTicket);
     }
 
     public LoginTicket findLoginTicket(String ticket) {
-        return loginTicketMapper.selectByTicket(ticket);
+//        return loginTicketMapper.selectByTicket(ticket);
+        String key = RedisKeyUtil.getTicketKey(ticket);
+        return (LoginTicket) redisTemplate.opsForValue().get(key);
     }
 
     public int updateHeader(int userId, String headerUrl) {
-        return userMapper.updateHeader(userId, headerUrl);
+//        return userMapper.updateHeader(userId, headerUrl);
+        int rows = userMapper.updateHeader(userId, headerUrl);
+        clearCache(userId);
+        return rows;
     }
 
     public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
@@ -193,4 +215,25 @@ public class UserService implements TreeholeConstant {
     public User findUserByName(String username) {
         return userMapper.selectByUsername(username);
     }
+
+    // 1. 优先从缓存中取值
+    private User getCache(int userId) {
+        String key = RedisKeyUtil.getUserKey(userId);
+        return (User) redisTemplate.opsForValue().get(key);
+    }
+
+    // 2. 取不到时初始化缓存
+    private User initCache(int userId) {
+        User user = userMapper.selectById(userId);
+        String key = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.opsForValue().set(key, user, 3600, TimeUnit.SECONDS);
+        return user;
+    }
+
+    // 3. 数据变更时清除缓存数据
+    private void clearCache(int userId) {
+        String redisKey = RedisKeyUtil.getUserKey(userId);
+        redisTemplate.delete(redisKey);
+    }
+
 }

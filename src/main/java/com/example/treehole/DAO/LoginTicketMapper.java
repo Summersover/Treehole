@@ -4,6 +4,7 @@ import com.example.treehole.Entity.LoginTicket;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
+@Deprecated
 public interface LoginTicketMapper {
 
     @Insert({

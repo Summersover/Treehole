@@ -1,8 +1,11 @@
 package com.example.treehole.Controller;
 
+import com.example.treehole.Entity.Event;
 import com.example.treehole.Entity.User;
+import com.example.treehole.Event.EventProducer;
 import com.example.treehole.Service.LikeService;
 import com.example.treehole.Util.HostHolder;
+import com.example.treehole.Util.TreeholeConstant;
 import com.example.treehole.Util.TreeholeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,16 +16,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class LikeController {
+public class LikeController implements TreeholeConstant {
     @Autowired
     private LikeService likeService;
 
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @PostMapping("/like")
     @ResponseBody
-    public String like(int entityType, int entityId, int entityUserId) {
+    public String like(int entityType, int entityId, int entityUserId, int postId) {
         User user = hostHolder.getUser();
 
         // 点赞操作
@@ -36,6 +42,18 @@ public class LikeController {
         Map<String, Object> map = new HashMap<>();
         map.put("likeCount", likeCount);
         map.put("likeStatus", likeStatus);
+
+        // 触发点赞事件
+        if (likeStatus == 1) {
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId", postId);
+            eventProducer.fireEvent(event);
+        }
 
         return TreeholeUtil.getJsonString(0, null, map);
     }

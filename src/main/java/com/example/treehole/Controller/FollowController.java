@@ -1,7 +1,9 @@
 package com.example.treehole.Controller;
 
+import com.example.treehole.Entity.Event;
 import com.example.treehole.Entity.Page;
 import com.example.treehole.Entity.User;
+import com.example.treehole.Event.EventProducer;
 import com.example.treehole.Service.FollowService;
 import com.example.treehole.Service.UserService;
 import com.example.treehole.Util.HostHolder;
@@ -28,12 +30,24 @@ public class FollowController implements TreeholeConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @PostMapping(path = "/follow")
     @ResponseBody
     public String follow(int entityType, int entityId) {
         User user = hostHolder.getUser();
 
         followService.follow(user.getId(), entityType, entityId);
+
+        // 触发关注事件
+        Event event=new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
 
         return TreeholeUtil.getJsonString(0, "已关注!");
     }
